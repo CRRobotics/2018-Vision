@@ -16,6 +16,7 @@ public class ContourOfGod {
     //Outputs
     private Mat hsvThresholdOutput = new Mat();
     private Mat cvDilateOutput = new Mat();
+    private Mat cvErodeOutput = new Mat();
     private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
     private ArrayList<MatOfPoint> convexHullsOutput = new ArrayList<MatOfPoint>();
 
@@ -27,19 +28,30 @@ public class ContourOfGod {
     /**
      * This is the primary method that runs the entire pipeline and updates the outputs.
      */
-    public ArrayList<MatOfPoint> process(Mat source0) {
+    public void process(Mat source0) {
         // Step HSV_Threshold0:
         Mat hsvThresholdInput = source0;
-        double[] hsvThresholdHue = {67.17625899280576, 84.01023890784982};
+        double[] hsvThresholdHue = {67.17625899280576, 95.0};
         double[] hsvThresholdSaturation = {53.88938848920863, 158.1783276450512};
         double[] hsvThresholdValue = {166.2544964028777, 255.0};
         hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
 
+
+
+        // Step CV_Erpde0:
+        Mat cvErodeSrc = hsvThresholdOutput;
+        Mat cvErodeKernal = new Mat();
+        Point cvErodeAnchor = new Point(-1, -1);
+        double cvErodeIterations = 3.0;
+        int cvErodeBordertype = Core.BORDER_CONSTANT;
+        Scalar cvErodeBordervalue = new Scalar(-1);
+        cvErode(cvErodeSrc, cvErodeKernal, cvErodeAnchor, cvErodeIterations, cvErodeBordertype, cvErodeBordervalue, cvErodeOutput);
+
         // Step CV_dilate0:
-        Mat cvDilateSrc = hsvThresholdOutput;
+        Mat cvDilateSrc = cvErodeOutput;
         Mat cvDilateKernel = new Mat();
         Point cvDilateAnchor = new Point(-1, -1);
-        double cvDilateIterations = 5.0;
+        double cvDilateIterations = 2.0;
         int cvDilateBordertype = Core.BORDER_CONSTANT;
         Scalar cvDilateBordervalue = new Scalar(-1);
         cvDilate(cvDilateSrc, cvDilateKernel, cvDilateAnchor, cvDilateIterations, cvDilateBordertype, cvDilateBordervalue, cvDilateOutput);
@@ -52,7 +64,6 @@ public class ContourOfGod {
         // Step Convex_Hulls0:
         ArrayList<MatOfPoint> convexHullsContours = findContoursOutput;
         convexHulls(convexHullsContours, convexHullsOutput);
-        return convexHullsContours;
     }
 
     /**
@@ -69,6 +80,14 @@ public class ContourOfGod {
      */
     public Mat cvDilateOutput() {
         return cvDilateOutput;
+    }
+
+    /**
+     * This method is a generated getter for the output of a CV_dilate.
+     * @return Mat output from CV_dilate.
+     */
+    public Mat cvErodeOutput() {
+        return cvErodeOutput;
     }
 
     /**
@@ -126,6 +145,19 @@ public class ContourOfGod {
             borderValue = new Scalar(-1);
         }
         Imgproc.dilate(src, dst, kernel, anchor, (int)iterations, borderType, borderValue);
+    }
+    private void cvErode(Mat src, Mat kernel, Point anchor, double iterations,
+                          int borderType, Scalar borderValue, Mat dst) {
+        if (kernel == null) {
+            kernel = new Mat();
+        }
+        if (anchor == null) {
+            anchor = new Point(-1,-1);
+        }
+        if (borderValue == null){
+            borderValue = new Scalar(-1);
+        }
+        Imgproc.erode(src, dst, kernel, anchor, (int)iterations, borderType, borderValue);
     }
 
     /**
