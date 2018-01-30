@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.effect.GaussianBlur;
 import org.opencv.core.*;
 import org.opencv.imgproc.*;
 
@@ -17,6 +18,7 @@ public class ContourOfGod {
     private Mat hsvThresholdOutput = new Mat();
     private Mat cvDilateOutput = new Mat();
     private Mat cvErodeOutput = new Mat();
+    private Mat blurOutput = new Mat();
     private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
     private ArrayList<MatOfPoint> convexHullsOutput = new ArrayList<MatOfPoint>();
 
@@ -31,9 +33,9 @@ public class ContourOfGod {
     public void process(Mat source0) {
         // Step HSV_Threshold0:
         Mat hsvThresholdInput = source0;
-        double[] hsvThresholdHue = {67.17625899280576, 95.0};
-        double[] hsvThresholdSaturation = {53.88938848920863, 158.1783276450512};
-        double[] hsvThresholdValue = {166.2544964028777, 255.0};
+        double[] hsvThresholdHue = {0.17625899280576, 255.0};
+        double[] hsvThresholdSaturation = {100, 200.0};
+        double[] hsvThresholdValue = {126.2544964028777, 255.0};
         hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
 
 
@@ -56,8 +58,14 @@ public class ContourOfGod {
         Scalar cvDilateBordervalue = new Scalar(-1);
         cvDilate(cvDilateSrc, cvDilateKernel, cvDilateAnchor, cvDilateIterations, cvDilateBordertype, cvDilateBordervalue, cvDilateOutput);
 
+        // Step Blur0:
+        Mat blurInput = cvDilateOutput;
+        BlurType blurType = BlurType.get("Gaussian Blur");
+        double blurRadius = 1.0;
+        blur(blurInput, blurType, blurRadius, blurOutput);
+
         // Step Find_Contours0:
-        Mat findContoursInput = cvDilateOutput;
+        Mat findContoursInput = blurOutput;
         boolean findContoursExternalOnly = false;
         findContours(findContoursInput, findContoursExternalOnly, findContoursOutput);
 
@@ -83,11 +91,19 @@ public class ContourOfGod {
     }
 
     /**
-     * This method is a generated getter for the output of a CV_dilate.
-     * @return Mat output from CV_dilate.
+     * This method is a generated getter for the output of a CV_erode.
+     * @return Mat output from CV_erode.
      */
     public Mat cvErodeOutput() {
         return cvErodeOutput;
+    }
+
+    /**
+     * This method is a generated getter for the output of a Blur.
+     * @return Mat output from blur.
+     */
+    public Mat blurOutput() {
+        return blurOutput;
     }
 
     /**
@@ -121,6 +137,33 @@ public class ContourOfGod {
         Imgproc.cvtColor(input, out, Imgproc.COLOR_BGR2HSV);
         Core.inRange(out, new Scalar(hue[0], sat[0], val[0]),
                 new Scalar(hue[1], sat[1], val[1]), out);
+    }
+
+    /**
+     * An indication of which type of filter to use for a blur.
+     * Choices are BOX, GAUSSIAN, MEDIAN, and BILATERAL
+     */
+    enum BlurType {
+        BOX("Box Blur"), GAUSSIAN("Gaussian Blur"), MEDIAN("Median Filter"),
+        BILATERAL("Bilateral Filter");
+
+        private final String label;
+
+        BlurType(String label) {
+            this.label = label;
+        }
+
+        public static BlurType get(String type) {
+            if (BILATERAL.label.equals(type)) {
+                return BILATERAL;
+            } else if (GAUSSIAN.label.equals(type)) {
+                return GAUSSIAN;
+            } else if (MEDIAN.label.equals(type)) {
+                return MEDIAN;
+            } else {
+                return BOX;
+            }
+        }
     }
 
     /**
@@ -158,6 +201,35 @@ public class ContourOfGod {
             borderValue = new Scalar(-1);
         }
         Imgproc.erode(src, dst, kernel, anchor, (int)iterations, borderType, borderValue);
+    }
+
+    /**
+     * Softens an image using one of several filters.
+     * @param input The image on which to perform the blur.
+     * @param type The blurType to perform.
+     * @param doubleRadius The radius for the blur.
+     * @param output The image in which to store the output.
+     */
+    private void blur(Mat input, BlurType type, double doubleRadius, Mat output) {
+        int radius = (int)(doubleRadius + 0.5);
+        int kernelSize;
+        switch(type){
+            case BOX:
+                kernelSize = 2 * radius + 1;
+                Imgproc.blur(input, output, new Size(kernelSize, kernelSize));
+                break;
+            case GAUSSIAN:
+                kernelSize = 6 * radius + 1;
+                Imgproc.GaussianBlur(input,output, new Size(kernelSize, kernelSize), radius);
+                break;
+            case MEDIAN:
+                kernelSize = 2 * radius + 1;
+                Imgproc.medianBlur(input, output, kernelSize);
+                break;
+            case BILATERAL:
+                Imgproc.bilateralFilter(input, output, -1, radius, radius);
+                break;
+        }
     }
 
     /**
