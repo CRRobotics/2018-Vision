@@ -40,7 +40,7 @@ public class Main {
         ContourOfGod cog = new ContourOfGod();
         System.out.print(cog.convexHullsOutput());
         VideoCapture camera = new VideoCapture(1);
-        boolean TargetInrange;
+        camera.set(15,-1);
 
 
         Mat frame = new Mat();
@@ -49,14 +49,6 @@ public class Main {
 
         WindowWithImage window2 = new WindowWithImage("wow2", 700, 0);
         WindowWithImage window = new WindowWithImage("wow", 0, 0);
-
-        double time = System.currentTimeMillis();
-
-        long startTime = System.currentTimeMillis();
-
-        int frames = 0;
-        int timer = 0;
-        int runs = 1;
         //Timer timer = new Timer();
         // Timer.schedule(new FPS(frames), 0, 5000);
 //        while (!window.isOpen()) continue;
@@ -68,7 +60,6 @@ public class Main {
                 while (window.isOpen()) {
 
                         if (camera.read(frame)) {
-                            frames++;
 
                             cog.process(frame);
                             //t.window(image, "Original Image", 0, 0);
@@ -90,45 +81,46 @@ public class Main {
                                 asdasd.convertTo(zz, CvType.CV_32S);
                                 Point[] zz2 = zz.toArray();
                                 LinkedList<Line> biggest = new LinkedList<Line>();
-                                for(int i = 0; i < 4; i++) {
+                                for(int i = 0; i < 1; i++) {
                                     Line l = new Line(new Point(0., 0.), new Point(0., 0.), 0.0);
                                     biggest.add(l);
                                 }
-                                int zzz = 0;
-                                for(int i = 0; i < zz2.length; i++) {
-                                    Point p = zz2[(i+1) % zz2.length];
-                                    double dx = (p.x - zz2[i].x);
-                                    double dy = (p.y - zz2[i].y);
-                                    double len_2 = dx * dx + dy * dy;
+//                                int zzz = 0;
+                                for(int k = 0; k < zz2.length; k++) {
+                                    Point p = zz2[(k+1) % zz2.length];
+                                    double dx = (p.x - zz2[k].x);
+                                    double dy = (p.y - zz2[k].y);
+                                    double len_2 = Math.sqrt(dx * dx + dy * dy);
                                     if(len_2 > biggest.getFirst().len_2) {
-                                        zzz++;
+//                                        zzz++;
                                         int j = 0;
                                         for(Line l : biggest) {
+                                            System.out.println(len_2);
                                             if(len_2 <= l.len_2) {
                                                 break;
                                             }
                                             j++;
                                         }
-                                        biggest.add(j, new Line(zz2[i], p, len_2));
+                                        biggest.add(j, new Line(zz2[k], p, len_2));
                                         biggest.remove(0);
                                         //System.out.println("Replaced idx " + j);
-                                        for(Line l : biggest) {
-                                            
-                                        }
+//                                        for(Line l : biggest) {
+//
+//                                        }
                                     }
                                 }
                                 //System.out.println("" + zzz + " " + zz2.length);
-                                int i = 0;
+//                                int l = 0;
                                 for(Line b : biggest) {
                                     //System.out.println("a " + b.a + " " + b.b);
                                     Imgproc.line(frame, b.a, b.b, new Scalar(255, 0, 0), 2);
-                                    i++;
+//                                    l++;
                                 }
                                 rect = Imgproc.boundingRect(zz);
                                 mops.add(zz);
 
                             }
-                            MatOfPoint c = new MatOfPoint();
+//                            MatOfPoint c = new MatOfPoint();
 
                             Imgproc.drawContours(frame, mops, -1, new Scalar(0, 0, 255));
                             if(rect != null) {
@@ -144,9 +136,9 @@ public class Main {
                                     frame.put((int)(z[o].y), (int)(z[o].x), u);
                             }*/
 
-                            Mat hsv = cog.hsvThresholdOutput();
+//                            Mat hsv = cog.hsvThresholdOutput();
                             Mat Dilate = cog.cvDilateOutput();
-                            Mat Erode = cog.cvErodeOutput();
+//                            Mat Erode = cog.cvErodeOutput();
                             //List<MatOfPoint> test2;
                             //ArrayList<MatOfPoint>
 

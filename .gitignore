@@ -1,7 +1,3 @@
 src/*.java
 out/*
-!src/ContourOfGod.java
-!src/Main.java
-!src/WindowWithImage.java
-!src/Distance.java
-!src/Angle.java
+
