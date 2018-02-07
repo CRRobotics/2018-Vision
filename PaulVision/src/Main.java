@@ -1,3 +1,4 @@
+import javafx.geometry.BoundingBox;
 import org.opencv.core.*;
 import org.opencv.core.Point;
 import org.opencv.videoio.VideoCapture;
@@ -40,6 +41,7 @@ public class Main {
 
 
         Mat frame = new Mat();
+        Rect rect2 = null;
         Mat f2 = null;
         camera.read(frame);
         //if(camera.read() = true) System.out.println();
@@ -57,17 +59,17 @@ public class Main {
                 if (camera.read(frame)) {
                     f2 = Mat.zeros(frame.rows(), frame.cols(), CvType.CV_8UC3);
                     cog.process(frame);
+                    Rect rect = null;
                     List<MatOfPoint> convexHulls = cog.convexHullsOutput();
                     for(MatOfPoint hull : convexHulls) {
                         MatOfPoint2f hp = new MatOfPoint2f();
                         hull.convertTo(hp, CvType.CV_32F);
-                        double len = Imgproc.arcLength(hp, true);
                         MatOfPoint2f new_curve = new MatOfPoint2f();
-//                        System.out.println(len*.005);
-                        Imgproc.approxPolyDP(hp, new_curve, len * .005, true);
+                        Imgproc.approxPolyDP(hp, new_curve, Imgproc.arcLength(hp, true) * .01, true);
                         MatOfPoint int_new_curve = new MatOfPoint();
                         new_curve.convertTo(int_new_curve, CvType.CV_32S);
                         Imgproc.drawContours(f2, Arrays.asList(int_new_curve), 0, new Scalar(0, 255, 0));
+                        rect = Imgproc.boundingRect(int_new_curve);
                     }
                     /**
                      * roary's attempt to print only the pixel length of the longest line
@@ -77,24 +79,29 @@ public class Main {
                     MatOfPoint2f mop2fApprox;
                     MatOfPoint2f mop2f;
                     MatOfPoint mop;
-                    Rect rect = null;
+
                     Point[] ap;
-                    for(MatOfPoint cont : contours){
-                        mop2f = new MatOfPoint2f();
-                        mop2fApprox = new MatOfPoint2f();
-                        mop = new MatOfPoint();
-                        cont.convertTo(mop2f, CvType.CV_32FC2);
-                        Imgproc.approxPolyDP(mop2f, mop2fApprox, Imgproc.arcLength(mop2f, true)*0.5, true);
-                        mop2f.convertTo(mop, CvType.CV_32S);
-                        rect = Imgproc.boundingRect(mop);
-                        ap = mop2fApprox.toArray();
-                        System.out.println(ap.length);
-                    }
-                    Imgproc.drawContours(f2, convexHulls, -1, new Scalar(0, 0, 255));
+                    double longest = 0;
+
+//                    for(MatOfPoint cont : contours) {
+//                        mop2f = new MatOfPoint2f();
+//                        mop2fApprox = new MatOfPoint2f();
+//                        mop = new MatOfPoint();
+//                        cont.convertTo(mop2f, CvType.CV_32FC2);
+//                        Imgproc.approxPolyDP(mop2f, mop2fApprox, Imgproc.arcLength(mop2f, true) * 0.01, true);
+//                        mop2f.convertTo(mop, CvType.CV_32S);
+
+//                        ap = mop2fApprox.toArray();
+////                        double current = rect.height;
+////                        if (current > longest)
+////                            longest = current;
+////                        System.out.println(ap.length);
+//                    }
                     if(rect != null) {
                         Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(0, 255, 0), 2);
-                        System.out.println(QuickMath.getAngle(rect.x + rect.width));
-                        System.out.println(QuickMath.getDistance(rect.width));
+////                        System.out.println(QuickMath.getAngle(rect.x + rect.width/2));
+////                        System.out.println(QuickMath.getDistance(rect.width));
+////                        System.out.println(longest);
                     }
 
                     window.image(frame);

@@ -46,7 +46,7 @@ public class CamCapture {
         }
 
         //detect default camera
-        VideoCapture capture = new VideoCapture(0);
+        VideoCapture capture = new VideoCapture(1);
 
         if (!capture.isOpened()) {
             System.out.println("Did not connected to camera.");
