@@ -1,12 +1,6 @@
-import javafx.geometry.BoundingBox;
 import org.opencv.core.*;
 import org.opencv.videoio.VideoCapture;
-//import org.opencv.highgui.ImageWindow;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import org.opencv.imgproc.*;
 
 
@@ -59,32 +53,13 @@ public class Main {
                     f2 = Mat.zeros(frame.rows(), frame.cols(), CvType.CV_8UC3);
                     cog.process(frame);
                     RotatedRect[] rects;
-                    List<MatOfPoint> convexHulls = cog.convexHullsOutput();
-                    for(MatOfPoint hull : convexHulls) {
-                        MatOfPoint2f hp = new MatOfPoint2f();
-                        hull.convertTo(hp, CvType.CV_32F);
-                        MatOfPoint2f new_curve = new MatOfPoint2f();
-                        Imgproc.approxPolyDP(hp, new_curve, Imgproc.arcLength(hp, true) * .005, true);
-                        MatOfPoint int_new_curve = new MatOfPoint();
-                        new_curve.convertTo(int_new_curve, CvType.CV_32S);
-                        Imgproc.drawContours(f2, Arrays.asList(int_new_curve), 0, new Scalar(0, 255, 0));
-                    }
-                    /**
-                     * roary's attempt to print only the pixel length of the longest line
-                     */
                     ArrayList<MatOfPoint> contours = cog.findContoursOutput();
-
-                    MatOfPoint2f mop2fApprox;
-                    MatOfPoint2f mop2f;
-                    MatOfPoint mop;
-
-                    Point[] ap;
-                    double longest = 0;
-                    MatOfPoint2f         approxCurve = new MatOfPoint2f();
+                    MatOfPoint2f approxCurve = new MatOfPoint2f();
                     rects = new RotatedRect[contours.size()];
                     //For each contour found
                     for (int i=0; i<contours.size(); i++)
                     {
+                        Imgproc.drawContours(f2, contours, i, new Scalar(0, 255, 0));
                         //Convert contours(i) from MatOfPoint to MatOfPoint2f
                         MatOfPoint2f contour2f = new MatOfPoint2f( contours.get(i).toArray() );
                         //Processing on mMOP2f1 which is in type MatOfPoint2f
@@ -115,30 +90,10 @@ public class Main {
                             if (r2.size.height + r2.size.width > rect2.size.height + rect2.size.width && !r2.equals(rect1))
                                 rect2 = r2;
                         }
-//                      System.out.println(QuickMath.getAngle((int)((rect1.center.x + rect2.center.x)/2 + .5)));
-                        System.out.println(QuickMath.getDistance((int)(rect1.size.width + rect1.size.height + .5)));
+                        System.out.println(QuickMath.getAngle((int)((rect1.center.x + rect2.center.x)/2 + .5)));
+//                        System.out.println(QuickMath.getDistance((int)(rect1.size.width + rect1.size.height + .5)));
                     }
 
-//                    for(MatOfPoint cont : contours) {
-//                        mop2f = new MatOfPoint2f();
-//                        mop2fApprox = new MatOfPoint2f();
-//                        mop = new MatOfPoint();
-//                        cont.convertTo(mop2f, CvType.CV_32FC2);
-//                        Imgproc.approxPolyDP(mop2f, mop2fApprox, Imgproc.arcLength(mop2f, true) * 0.01, true);
-//                        mop2f.convertTo(mop, CvType.CV_32S);
-
-//                        ap = mop2fApprox.toArray();
-////                        double current = rect.height;
-////                        if (current > longest)
-////                            longest = current;
-////                        System.out.println(ap.length);
-//                    }
-//                    if(rect != null) {
-//                        Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(0, 255, 0), 2);
-////                        System.out.println(QuickMath.getAngle(rect.x + rect.width/2));
-////                        System.out.println(QuickMath.getDistance(rect.width));
-////                        System.out.println(longest);
-//                    }
 
                     window.image(frame);
                     window2.image(f2);
