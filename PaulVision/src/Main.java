@@ -104,7 +104,7 @@ public class Main {
                             Imgproc.line(frame, pts[j], pts[(j+1)%pts.length], new Scalar(0,255,0));
                         }
                     }
-                    if(rects != null && rects.length > 2) {
+                    if(rects != null && rects.length > 1) {
                         RotatedRect rect1 = rects[0];
                         RotatedRect rect2 = rects[1];
                         for (RotatedRect r : rects) {
@@ -113,13 +113,10 @@ public class Main {
                         }
                         for (RotatedRect r2 : rects) {
                             if (r2.size.height + r2.size.width > rect2.size.height + rect2.size.width && !r2.equals(rect1))
-                                rect1 = r2;
+                                rect2 = r2;
                         }
-//                        System.out.println(QuickMath.getAngle((int)((rect1.center.x + rect2.center.x)/2 + .5)));
-                        if(rect1.size.height > rect1.size.width)
-                            System.out.println(QuickMath.getDistance((int)(rect1.size.height + .5)));
-                        else
-                            System.out.println(QuickMath.getDistance((int)(rect1.size.width + .5)));
+//                      System.out.println(QuickMath.getAngle((int)((rect1.center.x + rect2.center.x)/2 + .5)));
+                        System.out.println(QuickMath.getDistance((int)(rect1.size.width + rect1.size.height + .5)));
                     }
 
 //                    for(MatOfPoint cont : contours) {
