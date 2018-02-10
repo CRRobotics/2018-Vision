@@ -22,7 +22,7 @@ public class CameraSnapshotJavaFX extends Application {
     Mat matrix = null;
 
     @Override
-    public void start(Stage stage) throws FileNotFoundException, IOException {
+    public void start(Stage stage) {
         // Capturing the snapshot from the camera
         CameraSnapshotJavaFX obj = new CameraSnapshotJavaFX();
         WritableImage writableImage = obj.capureSnapShot();
