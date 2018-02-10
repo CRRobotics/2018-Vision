@@ -96,7 +96,7 @@ public class CamCapture {
 //        Mat f2 = null;
         camera.read(frame);
 
-        ImageWindow window = new ImageWindow("wow", 0, 0);
+        ImageWindow window = new ImageWindow("wow", 150, 100);
 //        ImageWindow window2 = new ImageWindow("wow2", 700, 0);
 
         while (window.isOpen()) {
