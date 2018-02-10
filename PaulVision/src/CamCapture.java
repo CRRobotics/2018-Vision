@@ -9,7 +9,12 @@ import java.util.ArrayList;
 
 public class CamCapture {
 
+    public static RotatedRect rect1;
+    public static RotatedRect rect2;
+    public static Point cubeCenter;
+
     /**
+     * this is the main part of vision that MUST be running for vision to actually work
      * @param args
      */
 
@@ -20,6 +25,7 @@ public class CamCapture {
 
         //detect camera
         VideoCapture camera = new VideoCapture(1);
+        camera.set(15,-1);
 //        String face_cascade_name = "haarcascade_frontalface_alt.xml";
 //        String eyes_cascade_name = "haarcascade_eye_tree_eyeglasses.xml";
 //        CascadeClassifier face_cascade = new CascadeClassifier();
@@ -84,15 +90,14 @@ public class CamCapture {
 //            }
 //        }
         GripPipeline cog = new GripPipeline();
-        System.out.print(cog.convexHullsOutput());
-        camera.set(15,-1);
+//        System.out.print(cog.convexHullsOutput());
 
         Mat frame = new Mat();
-        Mat f2 = null;
+//        Mat f2 = null;
         camera.read(frame);
 
-        ImageWindow window2 = new ImageWindow("wow2", 700, 0);
         ImageWindow window = new ImageWindow("wow", 0, 0);
+//        ImageWindow window2 = new ImageWindow("wow2", 700, 0);
 
         while (window.isOpen()) {
             //System.out.println(window.isOpen());
@@ -100,24 +105,22 @@ public class CamCapture {
                 throw new RuntimeException("Could not open camera!");
             } else {
                 if (camera.read(frame)) {
-                    f2 = Mat.zeros(frame.rows(), frame.cols(), CvType.CV_8UC3);
+//                    f2 = Mat.zeros(frame.rows(), frame.cols(), CvType.CV_8UC3);
                     cog.process(frame);
                     RotatedRect[] rects;
-                    ArrayList<MatOfPoint> contours = cog.findContoursOutput();
+                    ArrayList<MatOfPoint> hulls = cog.convexHullsOutput();
                     MatOfPoint2f approxCurve = new MatOfPoint2f();
-                    rects = new RotatedRect[contours.size()];
+                    rects = new RotatedRect[hulls.size()];
                     //For each contour found
-                    for (int i=0; i<contours.size(); i++)
+                    for (int i=0; i<hulls.size(); i++)
                     {
-                        Imgproc.drawContours(f2, contours, i, new Scalar(0, 255, 0));
-                        //Convert contours(i) from MatOfPoint to MatOfPoint2f
-                        MatOfPoint2f contour2f = new MatOfPoint2f( contours.get(i).toArray() );
+//                        Imgproc.drawContours(f2, hulls, i, new Scalar(0, 255, 0));
+                        //Convert hulls(i) from MatOfPoint to MatOfPoint2f
+                        MatOfPoint2f contour2f = new MatOfPoint2f( hulls.get(i).toArray() );
                         //Processing on mMOP2f1 which is in type MatOfPoint2f
                         double approxDistance = Imgproc.arcLength(contour2f, true)*0.005;
                         Imgproc.approxPolyDP(contour2f, approxCurve, approxDistance, true);
 
-                        //Convert back to MatOfPoint
-                        MatOfPoint points = new MatOfPoint( approxCurve.toArray() );
 
                         //make rects of contour
                         rects[i] = Imgproc.minAreaRect(approxCurve);
@@ -130,8 +133,8 @@ public class CamCapture {
                         }
                     }
                     if(rects != null && rects.length > 1) {
-                        RotatedRect rect1 = rects[0];
-                        RotatedRect rect2 = rects[1];
+                        rect1 = rects[0];
+                        rect2 = rects[1];
                         for (RotatedRect r : rects) {
                             if (r.size.height + r.size.width > rect1.size.height + rect1.size.width)
                                 rect1 = r;
@@ -140,12 +143,42 @@ public class CamCapture {
                             if (r2.size.height + r2.size.width > rect2.size.height + rect2.size.width && !r2.equals(rect1))
                                 rect2 = r2;
                         }
-                        System.out.println(QuickMath.getAngle((int)((rect1.center.x + rect2.center.x)/2 + .5)));
-//                        System.out.println(QuickMath.getDistance((int)(rect1.size.width + rect1.size.height + .5)));
+//                        System.out.println(QuickMath.getAngleOfStrips());
+//                        System.out.println(QuickMath.getDistanceOfStrips());
                     }
 
+                    /*
+                     this section of code is implementation of vision for the cube
+                     it is VERY IMPORTANT TO NOTE THAT I didnt use grip to generate the hues
+                     I just kinda eyeballed the values that are in Process2 however if Grip is used
+                     to edit the existing pipeline there will be errors because I changes that file
+                     to allow the processing for different hues
+                     */
+                    cog.process2(frame);
+                    ArrayList<MatOfPoint> hulls2 = cog.convexHullsOutput();
+
+                    /*
+                     I belive that the hull output automatically puts the largest in the beginning,
+                     if thats not the case then Ill just make a for loop that finds the index of the one that is biggest
+                     */
+                    MatOfPoint pointsOfCube = hulls2.get(0);
+                    Point[] cubePoints = pointsOfCube.toArray();
+                    double sumX = 0;
+                    double sumY = 0;
+                    for(Point p : cubePoints){
+                        sumX += p.x;
+                        sumY += p.y;
+                    }
+                    sumX /= cubePoints.length;
+                    sumY /= cubePoints.length;
+                    cubeCenter.x = sumX;
+                    cubeCenter.y = sumY;
+
+                    Imgproc.drawContours(frame, hulls2, 0, new Scalar(0, 255, 0));
+                    System.out.println(QuickMath.getAngleOfCube());
+
                     window.image(frame);
-                    window2.image(f2);
+//                    window2.image(f2);
 
                 }
             }

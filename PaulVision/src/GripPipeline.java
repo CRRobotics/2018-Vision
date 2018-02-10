@@ -45,16 +45,33 @@ public class GripPipeline {
 		double[] hsvThresholdHue = {67.17625899280576, 84.77815699658703};
 		double[] hsvThresholdSaturation = {68.79496402877697, 255.0};
 		double[] hsvThresholdValue = {57.32913669064748, 255.0};
-		hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
+		processHelp(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue);
+	}
 
-		// Step CV_erode0:
-		Mat cvErodeSrc = hsvThresholdOutput;
-		Mat cvErodeKernel = new Mat();
-		Point cvErodeAnchor = new Point(-1, -1);
-		double cvErodeIterations = 1;
-		int cvErodeBordertype = Core.BORDER_CONSTANT;
-		Scalar cvErodeBordervalue = new Scalar(-1);
-		cvErode(cvErodeSrc, cvErodeKernel, cvErodeAnchor, cvErodeIterations, cvErodeBordertype, cvErodeBordervalue, cvErodeOutput);
+    /**
+     * this is a secondary process method to process for different hues than the primary
+     * @param source0 camera source
+     */
+    public void process2(Mat source0) {
+        // Step HSV_Threshold0:
+        Mat hsvThresholdInput = source0;
+        double[] hsvThresholdHue = {40, 65};
+        double[] hsvThresholdSaturation = {150, 255.0};
+        double[] hsvThresholdValue = {150, 255.0};
+
+    }
+
+    public void processHelp(Mat hsvThresholdInput, double[] hsvThresholdHue, double[] hsvThresholdSaturation, double[] hsvThresholdValue){
+        hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
+
+        // Step CV_erode0:
+        Mat cvErodeSrc = hsvThresholdOutput;
+        Mat cvErodeKernel = new Mat();
+        Point cvErodeAnchor = new Point(-1, -1);
+        double cvErodeIterations = 1;
+        int cvErodeBordertype = Core.BORDER_CONSTANT;
+        Scalar cvErodeBordervalue = new Scalar(-1);
+        cvErode(cvErodeSrc, cvErodeKernel, cvErodeAnchor, cvErodeIterations, cvErodeBordertype, cvErodeBordervalue, cvErodeOutput);
 
 //		// Step CV_dilate0:
 //		Mat cvDilateSrc = cvErodeOutput;
@@ -65,31 +82,30 @@ public class GripPipeline {
 //		Scalar cvDilateBordervalue = new Scalar(-1);
 //		cvDilate(cvDilateSrc, cvDilateKernel, cvDilateAnchor, cvDilateIterations, cvDilateBordertype, cvDilateBordervalue, cvDilateOutput);
 
-		// Step Find_Contours0:
-		Mat findContoursInput = cvErodeOutput;
-		boolean findContoursExternalOnly = false;
-		findContours(findContoursInput, findContoursExternalOnly, findContoursOutput);
+        // Step Find_Contours0:
+        Mat findContoursInput = cvErodeOutput;
+        boolean findContoursExternalOnly = false;
+        findContours(findContoursInput, findContoursExternalOnly, findContoursOutput);
 
-		// Step Filter_Contours0:
-		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-		double filterContoursMinArea = 500.0;
-		double filterContoursMinPerimeter = 0.0;
-		double filterContoursMinWidth = 0;
-		double filterContoursMaxWidth = 1000;
-		double filterContoursMinHeight = 0;
-		double filterContoursMaxHeight = 1000;
-		double[] filterContoursSolidity = {71.94244604316546, 100};
-		double filterContoursMaxVertices = 1000000;
-		double filterContoursMinVertices = 0.0;
-		double filterContoursMinRatio = 0.0;
-		double filterContoursMaxRatio = 1000;
-		filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
+        // Step Filter_Contours0:
+        ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
+        double filterContoursMinArea = 500.0;
+        double filterContoursMinPerimeter = 0.0;
+        double filterContoursMinWidth = 0;
+        double filterContoursMaxWidth = 1000;
+        double filterContoursMinHeight = 0;
+        double filterContoursMaxHeight = 1000;
+        double[] filterContoursSolidity = {71.94244604316546, 100};
+        double filterContoursMaxVertices = 1000000;
+        double filterContoursMinVertices = 0.0;
+        double filterContoursMinRatio = 0.0;
+        double filterContoursMaxRatio = 1000;
+        filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
 
-		// Step Convex_Hulls0:
-		ArrayList<MatOfPoint> convexHullsContours = filterContoursOutput;
-		convexHulls(convexHullsContours, convexHullsOutput);
-
-	}
+        // Step Convex_Hulls0:
+        ArrayList<MatOfPoint> convexHullsContours = filterContoursOutput;
+        convexHulls(convexHullsContours, convexHullsOutput);
+    }
 
 	/**
 	 * This method is a generated getter for the output of a HSV_Threshold.
