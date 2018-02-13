@@ -6,6 +6,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class CamCapture {
 
@@ -24,8 +25,9 @@ public class CamCapture {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         //detect camera
-        VideoCapture camera = new VideoCapture(1);
-        camera.set(15,-1);
+        VideoCapture camera = new VideoCapture(0);
+        camera.set(15, -1);
+        cubeCenter = new Point();
 //        String face_cascade_name = "haarcascade_frontalface_alt.xml";
 //        String eyes_cascade_name = "haarcascade_eye_tree_eyeglasses.xml";
 //        CascadeClassifier face_cascade = new CascadeClassifier();
@@ -90,6 +92,7 @@ public class CamCapture {
 //            }
 //        }
         GripPipeline cog = new GripPipeline();
+        GripPipeline cog2 = new GripPipeline();
 //        System.out.print(cog.convexHullsOutput());
 
         Mat frame = new Mat();
@@ -154,28 +157,29 @@ public class CamCapture {
                      to edit the existing pipeline there will be errors because I changes that file
                      to allow the processing for different hues
                      */
-                    cog.process2(frame);
-                    ArrayList<MatOfPoint> hulls2 = cog.convexHullsOutput();
+                    cog2.process2(frame);
+                    ArrayList<MatOfPoint> hulls2 = cog2.convexHullsOutput();
+                    
+                    int bigI = 0;
+                    if(hulls2.size() > 0) {
+                        for(int i = 0; i < hulls2.size(); i++)
+                            if(QuickMath.polyArea(hulls2.get(bigI).toList()) < QuickMath.polyArea(hulls2.get(i).toList()))
+                                bigI = i;
+                        Point[] cubePoints = hulls2.get(bigI).toArray();
+                        double sumX = 0;
+                        double sumY = 0;
+                        for (Point p : cubePoints) {
+                            sumX += p.x;
+                            sumY += p.y;
+                        }
+                        sumX /= cubePoints.length;
+                        sumY /= cubePoints.length;
+                        cubeCenter.x = sumX;
+                        cubeCenter.y = sumY;
 
-                    /*
-                     I belive that the hull output automatically puts the largest in the beginning,
-                     if thats not the case then Ill just make a for loop that finds the index of the one that is biggest
-                     */
-                    MatOfPoint pointsOfCube = hulls2.get(0);
-                    Point[] cubePoints = pointsOfCube.toArray();
-                    double sumX = 0;
-                    double sumY = 0;
-                    for(Point p : cubePoints){
-                        sumX += p.x;
-                        sumY += p.y;
+                        Imgproc.drawContours(frame, hulls2, 0, new Scalar(0, 0, 255));
+                        System.out.println(QuickMath.getAngleOfCube());
                     }
-                    sumX /= cubePoints.length;
-                    sumY /= cubePoints.length;
-                    cubeCenter.x = sumX;
-                    cubeCenter.y = sumY;
-
-                    Imgproc.drawContours(frame, hulls2, 0, new Scalar(0, 255, 0));
-                    System.out.println(QuickMath.getAngleOfCube());
 
                     window.image(frame);
 //                    window2.image(f2);
