@@ -13,6 +13,7 @@ public class CamCapture {
     public static RotatedRect rect1;
     public static RotatedRect rect2;
     public static Point cubeCenter;
+    public static double cubePerim;
 
     /**
      * this is the main part of vision that MUST be running for vision to actually work
@@ -25,8 +26,8 @@ public class CamCapture {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         //detect camera
-        VideoCapture camera = new VideoCapture(0);
-        camera.set(15, -1);
+        VideoCapture camera = new VideoCapture(1);
+        camera.set(15, -6);
         cubeCenter = new Point();
 //        String face_cascade_name = "haarcascade_frontalface_alt.xml";
 //        String eyes_cascade_name = "haarcascade_eye_tree_eyeglasses.xml";
@@ -146,7 +147,7 @@ public class CamCapture {
                             if (r2.size.height + r2.size.width > rect2.size.height + rect2.size.width && !r2.equals(rect1))
                                 rect2 = r2;
                         }
-//                        System.out.println(QuickMath.getAngleOfStrips());
+//                        System.out.println(QuickMath.gethAngleOfStrips());
 //                        System.out.println(QuickMath.getDistanceOfStrips());
                     }
 
@@ -159,12 +160,15 @@ public class CamCapture {
                      */
                     cog2.process2(frame);
                     ArrayList<MatOfPoint> hulls2 = cog2.convexHullsOutput();
-                    
+
                     int bigI = 0;
                     if(hulls2.size() > 0) {
                         for(int i = 0; i < hulls2.size(); i++)
                             if(QuickMath.polyArea(hulls2.get(bigI).toList()) < QuickMath.polyArea(hulls2.get(i).toList()))
                                 bigI = i;
+//                        System.out.println(QuickMath.polyArea(hulls2.get(bigI).toList()));
+                        cubePerim = Imgproc.arcLength(new MatOfPoint2f(hulls2.get(bigI).toArray()), true);
+                        System.out.println(cubePerim);
                         Point[] cubePoints = hulls2.get(bigI).toArray();
                         double sumX = 0;
                         double sumY = 0;
@@ -177,8 +181,8 @@ public class CamCapture {
                         cubeCenter.x = sumX;
                         cubeCenter.y = sumY;
 
-                        Imgproc.drawContours(frame, hulls2, 0, new Scalar(0, 0, 255));
-                        System.out.println(QuickMath.getAngleOfCube());
+                        Imgproc.drawContours(frame, hulls2, bigI, new Scalar(0, 0, 255));
+//                        System.out.println(QuickMath.getvAngleOfCube());
                     }
 
                     window.image(frame);

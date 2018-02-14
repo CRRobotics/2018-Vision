@@ -5,11 +5,13 @@ import java.util.List;
 
 public class QuickMath {
 
-    private static double portionOfPerim = Constants.KNOWNLENGTH/(Constants.KNOWNLENGTH + Constants.KNOWNWIDTH);
+    private static double lengOfCubePerim = Constants.STRIPLENGTH /(Constants.STRIPLENGTH + Constants.STRIPWIDTH);
 
-    public static double angle(int x){ return  (x - Constants.MAXPIX/2) * Constants.FOV/Constants.MAXPIX; }
+    public static double hAngle(int x){ return  (x - Constants.HMAXPIX /2) * Constants.HFOV /Constants.HMAXPIX; }
 
-    public static double distance(int measuredPix) { return Constants.KNOWNLENGTH * Constants.FL / measuredPix; }
+    public static double vAngle(int y){ return  (y - Constants.VMAXPIX /2) * Constants.VFOV /Constants.VMAXPIX; }
+
+    public static double distance(int measuredPix, double knownLength) { return knownLength * Constants.FL / measuredPix; }
 
     public static double triArea(Point a, Point b, Point c){ return Math.abs(a.x*(b.y - c.y)+b.x*(c.y - a.y)+c.x*(a.y - b.y))/2; }
 
@@ -20,9 +22,14 @@ public class QuickMath {
         return triArea(pts.get(pts.size() - 2), pts.get(pts.size() - 1), pts.get(0)) + polyArea(npts);
     }
 
-    public static double getAngleOfStrips(){ return angle((int)((CamCapture.rect1.center.x + CamCapture.rect2.center.x)/2 + .5)); }
+    public static double getAngleOfStrips(){ return hAngle((int)((CamCapture.rect1.center.x + CamCapture.rect2.center.x)/2 + .5)); }
 
-    public static double getAngleOfCube(){ return angle((int)CamCapture.cubeCenter.x); }
+    public static double gethAngleOfCube(){ return hAngle((int)CamCapture.cubeCenter.x); }
 
-    public static double getDistanceOfStrips(){ return distance((int)(((CamCapture.rect1.size.width + CamCapture.rect1.size.height ) * portionOfPerim) + .5)); }
+    public static double getvAngleOfCube(){ return vAngle((int)CamCapture.cubeCenter.y); }
+
+    public static double getDistanceOfStrips(){
+        return distance((int)(((CamCapture.rect1.size.width + CamCapture.rect1.size.height ) * lengOfCubePerim) + .5), Constants.STRIPLENGTH);
+    }
+
 }
