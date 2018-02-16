@@ -11,5 +11,7 @@
     <orderEntry type="library" name="opencv-340" level="project" />
     <orderEntry type="library" name="opencv-3401" level="project" />
     <orderEntry type="library" name="x64" level="project" />
+    <orderEntry type="library" name="ntcore-java-4.0.0" level="project" />
+    <orderEntry type="library" name="wpiutil-java-3.0.0" level="project" />
   </component>
 </module>

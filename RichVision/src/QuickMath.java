@@ -22,13 +22,15 @@ public class QuickMath {
         return triArea(pts.get(pts.size() - 2), pts.get(pts.size() - 1), pts.get(0)) + polyArea(npts);
     }
 
-    public static double getAngleOfStrips(){ return hAngle((int)((CamCapture.rect1.center.x + CamCapture.rect2.center.x)/2 + .5)); }
+    public static double gethAngleOfStrips(){ return hAngle((int)((CamCapture.rect1.center.x + CamCapture.rect2.center.x)/2 + .5)); }
+
+    public static double getvAngleOfStrips(){ return vAngle((int)((CamCapture.rect1.center.y + CamCapture.rect2.center.y)/2 + .5)); }
 
     public static double gethAngleOfCube(){ return hAngle((int)CamCapture.cubeCenter.x); }
 
     public static double getvAngleOfCube(){ return vAngle((int)CamCapture.cubeCenter.y); }
 
-    public static double getDistanceOfStrips(){
+    public static double getDistOfStrips(){
         return distance((int)(((CamCapture.rect1.size.width + CamCapture.rect1.size.height ) * lengOfCubePerim) + .5), Constants.STRIPLENGTH);
     }
 

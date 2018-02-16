@@ -1,3 +1,5 @@
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import org.opencv.core.*;
 import org.opencv.highgui.Highgui;
 import org.opencv.videoio.VideoCapture;
@@ -14,6 +16,8 @@ public class CamCapture {
     public static RotatedRect rect2;
     public static Point cubeCenter;
     public static double cubePerim;
+    // declare it
+    private static NetworkTableInstance table;
 
     /**
      * this is the main part of vision that MUST be running for vision to actually work
@@ -25,8 +29,14 @@ public class CamCapture {
         //load opencv native library
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
+        // Init NetworkTable
+//      NetworkTable.setIPAddress("10.6.39.2");  // ip of crio
+//      table = NetworkTable.getTable("camera");
+        table = NetworkTableInstance.getDefault();
+        table.startClient("skynet");
+
         //detect camera
-        VideoCapture camera = new VideoCapture(1);
+        VideoCapture camera = new VideoCapture(0);
         camera.set(15, -6);
         cubeCenter = new Point();
 //        String face_cascade_name = "haarcascade_frontalface_alt.xml";
@@ -187,6 +197,23 @@ public class CamCapture {
 
                     window.image(frame);
 //                    window2.image(f2);
+
+
+                    // in the image processing loop
+
+//                    table.beginTransaction();
+//                    table.putNumber("strip distance", QuickMath.getDistOfStrips());
+//                    table.putNumber("cube vertical angle", QuickMath.getvAngleOfCube());
+//                    table.putNumber("cube horizontal angle", QuickMath.gethAngleOfCube());
+//                    table.putNumber("strips vertical angle", QuickMath.getvAngleOfStrips());
+//                    table.putNumber("strips horizontal angle", QuickMath.gethAngleOfStrips());
+//                    table.endTransaction();
+
+                    table.getEntry("strip distance").setValue(QuickMath.getDistOfStrips());
+                    table.getEntry("cube vertical angle").setValue(QuickMath.getvAngleOfCube());
+                    table.getEntry("cube horizontal angle").setValue(QuickMath.gethAngleOfCube());
+                    table.getEntry("strips vertical angle").setValue(QuickMath.getvAngleOfStrips());
+                    table.getEntry("strips horizontal angle").setValue(QuickMath.gethAngleOfStrips());
 
                 }
             }
